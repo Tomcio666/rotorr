@@ -2,46 +2,45 @@ import kivy
 from kivy.app import App
 from kivy.lang import Builder 
 from kivy.uix.boxlayout import BoxLayout
+from kivy.uix.widget import Widget
 from kivy.properties import NumericProperty
+from kivy.properties import ObjectProperty
 import socket
 
 
 def client(data):
-    host = socket.gethostbyname()
     port = 5000
 
     client_soc = socket.socket()
-    client_soc.connect((host,port))
-    client_soc.send(data.encode())
+    client_soc.connect(('127.0.0.1', port))
+    client_soc.send(str(data).encode("utf-8"))
     client_soc.close()
 
 
-    Builder.load_string('''
-    <MainWidget>:
-        BoxLayout:
-            size: root.size
-            orientation: 'vertical'
-
-            Label:
-                text: str(root.angle)
-
-            GridLayout:
-                cols: 2
-
-                Button:
-                    text: 'left'
-                    on_press: root.changeAngle('left')
-
-
-    ''')
-
-
-class MainWidget(BoxLayout):
-    angle = NumericProperty()
+class MainWidget(Widget):
     
-    def __init__(self, dir):
-        super(MainWidget, self).__init__(**kwargs)
-    
+    def __init__(self):
+        super(MainWidget, self).__init__()
+        self.angle = 0
+        client(0)
+        self.changeAngle('right')
+        Builder.load_string('''
+        <MainWidget>:
+            BoxLayout:
+                size: root.size
+                orientation: "vertical"
+                Label:
+                    text: '''+f"'{self.angle}'"+'''
+                GridLayout:
+                    cols: 2
+
+                    Button:
+                        text: 'left'
+                        on_press: root.changeAngle('left')
+                    Button:
+                        text: 'right'
+                        on_press: root.changeAngle('right')
+        ''')
 
     def changeAngle(self, dir):
         if dir == 'right':
@@ -61,4 +60,3 @@ class MyApp(App):
 if __name__ == '__main__':
     MyApp().run()
 
-    
